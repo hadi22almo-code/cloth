@@ -1,3 +1,5 @@
+import type { Enums } from "@/lib/supabase/database.types";
+
 /**
  * حالات الطلب — **المصدر الوحيد** في طبقة التطبيق.
  *
@@ -21,7 +23,12 @@ export const ORDER_STATUSES = [
   "cancelled",
 ] as const;
 
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
+/**
+ * النوع يُشتقّ من نوع `order_status` في قاعدة البيانات لا من القائمة أعلاه.
+ * فإن أُضيفت حالة في SQL ولم تُضف هنا، رفض المترجم `LABELS` لنقص مفتاح —
+ * أي أن التطابق صار مفروضاً لا موصى به.
+ */
+export type OrderStatus = Enums<"order_status">;
 
 const LABELS: Record<OrderStatus, string> = {
   pending: "بانتظار التأكيد",

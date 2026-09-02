@@ -33,9 +33,14 @@ let dbError: unknown = null;
 /** الفلاتر التي طبّقها الكود فعلاً — نتحقّق منها لا من نيّته. */
 let applied: { column: string; value: unknown }[] = [];
 
+/*
+ * باني استعلامات Supabase **قابل للانتظار بنفسه**: لا تُستدعى دالة تنفيذ في
+ * النهاية، بل ينتهي الانتظار على السلسلة مباشرةً. لذا يحمل المُقلِّد `then`.
+ */
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseAdminClient: () => ({
     from: () => {
+      const result = () => ({ data: rows, error: dbError });
       const builder = {
         select: () => builder,
         in: () => builder,
@@ -43,7 +48,10 @@ vi.mock("@/lib/supabase/server", () => ({
           applied.push({ column, value });
           return builder;
         },
-        returns: () => Promise.resolve({ data: rows, error: dbError }),
+        returns: () => builder,
+        then: (
+          resolve: (value: ReturnType<typeof result>) => unknown,
+        ) => Promise.resolve(result()).then(resolve),
       };
       return builder;
     },

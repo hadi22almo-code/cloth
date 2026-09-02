@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/supabase/database.types";
 import { tshirt } from "@/data/products";
 import type { ColorVariant, Product, SizeOption } from "@/lib/types";
 import {
@@ -15,29 +16,13 @@ import {
  * الحالتين، فلا يعرف أي مكوّن عرض من أين جاءت البيانات.
  */
 
-interface VariantRow {
-  slug: string;
-  color_name_ar: string;
-  color_hex: string;
-  image_url: string | null;
-  stock: number;
-}
-
-interface SizeRow {
-  label: string;
-  stock: number;
-}
-
-interface ProductRow {
-  slug: string;
-  name_ar: string;
-  description_ar: string;
-  price: number | string;
-  currency: string;
-  model_path: string;
-  product_variants: VariantRow[];
-  product_sizes: SizeRow[];
-}
+/*
+ * لا تعريف يدوي للصف: العميل يحمل نوع المخطّط فيستنتج شكل الاستعلام المتداخل.
+ * أي عمود يُحذف من القاعدة يصير خطأ ترجمة هنا لا مفاجأة في الإنتاج.
+ */
+type ProductRow = NonNullable<
+  Awaited<ReturnType<typeof selectProduct>>["data"]
+>;
 
 const SELECT = `
   slug, name_ar, description_ar, price, currency, model_path,
@@ -46,9 +31,21 @@ const SELECT = `
 `;
 
 function readClient() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false },
   });
+}
+
+/** الاستعلام معزول ليُشتقّ منه نوع الصف أعلاه. */
+function selectProduct(slug: string) {
+  return readClient()
+    .from("products")
+    .select(SELECT)
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .order("position", { referencedTable: "product_variants" })
+    .order("position", { referencedTable: "product_sizes" })
+    .single();
 }
 
 function toProduct(row: ProductRow): Product {
@@ -88,14 +85,7 @@ export async function getProduct(
   if (!isSupabaseConfigured) return { product: tshirt, source: "local" };
 
   try {
-    const { data, error } = await readClient()
-      .from("products")
-      .select(SELECT)
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .order("position", { referencedTable: "product_variants" })
-      .order("position", { referencedTable: "product_sizes" })
-      .single<ProductRow>();
+    const { data, error } = await selectProduct(slug);
 
     if (error || !data || data.product_variants.length === 0) {
       return { product: tshirt, source: "local" };

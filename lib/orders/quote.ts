@@ -28,24 +28,13 @@ export type QuoteResult =
   | { ok: true; quote: Quote }
   | { ok: false; status: number; error: string };
 
-interface ProductRow {
-  slug: string;
-  name_ar: string;
-  price: number | string;
-  currency: string;
-  product_variants: {
-    id: string;
-    slug: string;
-    color_name_ar: string;
-    stock: number;
-  }[];
-  /**
-   * المقاسات هنا **راية توفّر** لا مخزون معدود: القطع محسوبة على اللون في
-   * product_variants، فخصمها مرّتين يزوّر الجرد. نتحقّق أن المقاس موجود
-   * ومتوفّر، ولا نخصم منه.
-   */
-  product_sizes: { label: string; stock: number }[];
-}
+/*
+ * المقاسات في هذا الاستعلام **راية توفّر** لا مخزون معدود: القطع محسوبة على
+ * اللون في product_variants، فخصمها مرّتين يزوّر الجرد. نتحقّق أن المقاس
+ * موجود ومتوفّر، ولا نخصم منه.
+ *
+ * ولا تعريف يدوي للصف: العميل يحمل نوع المخطّط فيستنتجه.
+ */
 
 const SELECT = `
   slug, name_ar, price, currency,
@@ -80,8 +69,7 @@ export async function buildQuote(items: OrderItemInput[]): Promise<QuoteResult> 
     .from("products")
     .select(SELECT)
     .in("slug", productSlugs)
-    .eq("is_active", true)
-    .returns<ProductRow[]>();
+    .eq("is_active", true);
 
   if (error) return { ok: false, status: 500, error: "تعذّر قراءة المنتجات." };
 

@@ -13,27 +13,10 @@ import { updateOrderStatus } from "../actions";
 // صفحات الإدارة تخصّ مستخدماً بعينه: لا تُصيَّر مسبقاً ولا تُخزَّن أبداً
 export const dynamic = "force-dynamic";
 
-interface Row {
-  id: string;
-  reference: string;
-  status: string;
-  payment_method: string;
-  receipt_path: string | null;
-  customer_name: string;
-  phone: string;
-  city: string;
-  address: string;
-  notes: string | null;
-  total: number | string;
-  currency: string;
-  created_at: string;
-  order_items: {
-    size_label: string;
-    quantity: number;
-    unit_price: number | string;
-    product_variants: { color_name_ar: string; color_hex: string } | null;
-  }[];
-}
+/*
+ * لا تعريف يدوي للصف: العميل يحمل نوع المخطّط فيستنتج شكل الاستعلام المتداخل.
+ * أي عمود يُحذف من القاعدة يصير خطأ ترجمة هنا لا مفاجأة في الإنتاج.
+ */
 
 /** التوقيت لا يُترك للخادم: بلا timeZone تظهر طلبات المساء على أنها أمس. */
 const stamp = (iso: string) =>
@@ -57,8 +40,7 @@ export default async function AdminOrdersPage() {
          product_variants ( color_name_ar, color_hex ) )`,
     )
     .order("created_at", { ascending: false })
-    .limit(100)
-    .returns<Row[]>();
+    .limit(100);
 
   const orders = data ?? [];
 

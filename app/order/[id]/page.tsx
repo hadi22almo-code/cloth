@@ -9,29 +9,10 @@ import { ReceiptUpload } from "./ReceiptUpload";
 
 export const metadata: Metadata = { title: "تفاصيل الطلب — قرص الألوان" };
 
-interface OrderRow {
-  id: string;
-  reference: string;
-  status: string;
-  payment_method: string;
-  wallet_id: string | null;
-  receipt_path: string | null;
-  customer_name: string;
-  phone: string;
-  city: string;
-  address: string;
-  subtotal: number | string;
-  shipping: number | string;
-  total: number | string;
-  currency: string;
-  created_at: string;
-  order_items: {
-    size_label: string;
-    quantity: number;
-    unit_price: number | string;
-    product_variants: { color_name_ar: string; color_hex: string } | null;
-  }[];
-}
+/*
+ * لا تعريف يدوي للصف: العميل يحمل نوع المخطّط فيستنتج شكل الاستعلام المتداخل.
+ * أي عمود يُحذف من القاعدة يصير خطأ ترجمة هنا لا مفاجأة في الإنتاج.
+ */
 
 export default async function OrderPage({
   params,
@@ -53,7 +34,7 @@ export default async function OrderPage({
              product_variants ( color_name_ar, color_hex ) )`,
         )
         .eq("id", id)
-        .maybeSingle<OrderRow>()
+        .maybeSingle()
     : { data: null };
 
   if (!data) notFound();

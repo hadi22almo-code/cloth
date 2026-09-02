@@ -16,24 +16,10 @@ import {
 export const dynamic = "force-dynamic";
 
 
-interface ProductRow {
-  id: string;
-  slug: string;
-  name_ar: string;
-  description_ar: string;
-  price: number | string;
-  currency: string;
-  product_variants: {
-    id: string;
-    slug: string;
-    color_name_ar: string;
-    color_hex: string;
-    image_url: string | null;
-    stock: number;
-    position: number;
-  }[];
-  product_sizes: { id: string; label: string; stock: number; position: number }[];
-}
+/*
+ * لا تعريف يدوي للصف: العميل يحمل نوع المخطّط فيستنتج شكل الاستعلام المتداخل.
+ * أي عمود يُحذف من القاعدة يصير خطأ ترجمة هنا لا مفاجأة في الإنتاج.
+ */
 
 const input =
   "rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
@@ -53,8 +39,7 @@ export default async function AdminProductsPage() {
        product_sizes ( id, label, stock, position )`,
     )
     .order("position", { referencedTable: "product_variants" })
-    .order("position", { referencedTable: "product_sizes" })
-    .returns<ProductRow[]>();
+    .order("position", { referencedTable: "product_sizes" });
 
   const products = data ?? [];
 

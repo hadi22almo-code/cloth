@@ -14,12 +14,6 @@ export type CreateResult =
   | { ok: true; order: CreatedOrder }
   | { ok: false; status: number; error: string };
 
-/** ما تعيده الدالة في قاعدة البيانات. */
-interface PlaceOrderRow {
-  order_id: string;
-  order_reference: string;
-}
-
 /** رمز الخطأ الذي ترفعه الدالة عند نقص المخزون. */
 const INSUFFICIENT_STOCK = "P0001";
 
@@ -84,8 +78,8 @@ export async function placeOrder(
     return { ok: false, status: 500, error: "تعذّر تسجيل الطلب." };
   }
 
-  // العميل غير مولَّد الأنواع، فالدالة تعيد unknown
-  const row = (data as PlaceOrderRow[] | null)?.[0];
+  // نوع العائد يأتي من المخطط المولَّد، فلا حاجة لتأكيد يدوي
+  const row = data?.[0];
   if (!row) {
     return { ok: false, status: 500, error: "تعذّر تسجيل الطلب." };
   }

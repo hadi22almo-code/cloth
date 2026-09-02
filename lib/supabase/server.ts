@@ -3,6 +3,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 import {
   SUPABASE_ANON_KEY,
   SUPABASE_URL,
@@ -18,7 +19,7 @@ export async function createSupabaseServerClient() {
   if (!isSupabaseConfigured) return null;
   const store = await cookies();
 
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {
@@ -39,11 +40,11 @@ export async function createSupabaseServerClient() {
  * لا يُستدعى إلا من معالجات المسارات على الخادم — أي تسريب لهذا المفتاح إلى
  * المتصفّح يفتح قاعدة البيانات بالكامل.
  */
-export function createSupabaseAdminClient(): SupabaseClient | null {
+export function createSupabaseAdminClient(): SupabaseClient<Database> | null {
   const key = serviceRoleKey();
   if (!SUPABASE_URL || !key) return null;
 
-  return createClient(SUPABASE_URL, key, {
+  return createClient<Database>(SUPABASE_URL, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

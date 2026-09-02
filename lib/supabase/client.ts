@@ -1,6 +1,7 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "./database.types";
 import {
   SUPABASE_ANON_KEY,
   SUPABASE_URL,
@@ -10,5 +11,5 @@ import {
 /** عميل المتصفّح — لتسجيل دخول لوحة الإدارة فقط. */
 export function createSupabaseBrowserClient() {
   if (!isSupabaseConfigured) return null;
-  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return createBrowserClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
