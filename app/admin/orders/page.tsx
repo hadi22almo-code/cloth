@@ -1,5 +1,6 @@
 import { Price } from "@/components/ui/Price";
 import { RECEIPT_BUCKET } from "@/lib/receipts";
+import { ORDER_STATUS_OPTIONS } from "@/lib/orders/status";
 import { paymentMethodShort } from "@/lib/shop-config";
 import {
   createSupabaseAdminClient,
@@ -11,15 +12,6 @@ import { updateOrderStatus } from "../actions";
 
 // صفحات الإدارة تخصّ مستخدماً بعينه: لا تُصيَّر مسبقاً ولا تُخزَّن أبداً
 export const dynamic = "force-dynamic";
-
-const STATUSES = [
-  ["pending", "بانتظار التأكيد"],
-  ["paid", "مدفوع"],
-  ["processing", "قيد التجهيز"],
-  ["shipped", "تم الشحن"],
-  ["delivered", "تم التسليم"],
-  ["cancelled", "ملغى"],
-] as const;
 
 interface Row {
   id: string;
@@ -223,7 +215,7 @@ export default async function AdminOrdersPage() {
                     defaultValue={order.status}
                     className="min-h-11 rounded-lg border border-border bg-background px-3 py-2 text-sm"
                   >
-                    {STATUSES.map(([value, label]) => (
+                    {ORDER_STATUS_OPTIONS.map(([value, label]) => (
                       <option key={value} value={value}>
                         {label}
                       </option>

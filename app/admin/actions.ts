@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
+import { ORDER_STATUSES } from "@/lib/orders/status";
 import { MAX_IMAGE_BYTES, PRODUCT_BUCKET } from "@/lib/product-images";
 import { sniffReceipt } from "@/lib/receipts";
 import {
@@ -91,14 +92,7 @@ function must(error: PostgrestLikeError | null) {
 
 /* ══════════════════ الطلبات ══════════════════ */
 
-const statusSchema = z.enum([
-  "pending",
-  "paid",
-  "processing",
-  "shipped",
-  "delivered",
-  "cancelled",
-]);
+const statusSchema = z.enum(ORDER_STATUSES);
 
 export async function updateOrderStatus(
   _prev: ActionState,

@@ -2,20 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Price } from "@/components/ui/Price";
+import { orderStatusLabel } from "@/lib/orders/status";
 import { WALLETS, paymentMethodLabel } from "@/lib/shop-config";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { ReceiptUpload } from "./ReceiptUpload";
 
 export const metadata: Metadata = { title: "تفاصيل الطلب — قرص الألوان" };
-
-const STATUS_AR: Record<string, string> = {
-  pending: "بانتظار التأكيد",
-  paid: "مدفوع",
-  processing: "قيد التجهيز",
-  shipped: "تم الشحن",
-  delivered: "تم التسليم",
-  cancelled: "ملغى",
-};
 
 interface OrderRow {
   id: string;
@@ -79,7 +71,7 @@ export default async function OrderPage({
         <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-muted">الحالة</dt>
-            <dd>{STATUS_AR[data.status] ?? data.status}</dd>
+            <dd>{orderStatusLabel(data.status)}</dd>
           </div>
           <div>
             <dt className="text-muted">طريقة الدفع</dt>

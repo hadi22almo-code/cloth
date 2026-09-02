@@ -1,0 +1,40 @@
+# يشغّل نفس الفحوص التي كنت أشغّلها يدوياً، عند كل دفع وكل طلب دمج.
+# الهدف: ألّا يدخل إلى main ما لا يمرّ — بدل الاعتماد على تذكّر أحدهم.
+name: فحوص
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # ci لا install: يلتزم بـpackage-lock.json حرفياً فلا تنزلق النسخ
+      - run: npm ci
+
+      - name: أنواع TypeScript
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npx eslint .
+
+      - name: الاختبارات
+        run: npx vitest run
+
+      # البناء يكشف ما لا يكشفه tsc: أخطاء التصيير وحدود الخادم والعميل
+      - name: بناء الإنتاج
+        run: npm run build
+        env:
+          # مفاتيح وهمية: البناء يحتاج وجودها لا صحّتها، والموقع مصمَّم
+          # ليعمل بالبيانات المحلية حين تكون القاعدة غير متاحة
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: build-only-placeholder
